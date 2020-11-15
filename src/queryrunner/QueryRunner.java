@@ -5,6 +5,7 @@
  */
 package queryrunner;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -185,10 +186,12 @@ public class QueryRunner {
 
     public static void main(String[] args) {
         // TODO code application logic here
-
+        Console con = System.console();
+        String hostname;
         final QueryRunner queryrunner = new QueryRunner();
-
-        if (args.length == 0)
+        boolean console = true;
+        //if (args.length == 0)
+        if (console == false)
         {
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
@@ -199,9 +202,12 @@ public class QueryRunner {
         }
         else
         {
-            if (args[0].equals ("-console"))
-            {
-                System.out.println("Nothing has been implemented yet. Please implement the necessary code");
+            //if (args[0].equals ("-console"))
+            //{
+
+                //System.out.println("Nothing has been implemented yet. Please implement the necessary code");
+                System.out.println("Connect to database using consol");
+                hostname = con.readLine("Enter hostname: ");
                 // TODO
                 // You should code the following functionality:
 
@@ -243,7 +249,7 @@ public class QueryRunner {
                 //    alter any code in QueryJDBC, QueryData, or QueryFrame to make this work.
 //                System.out.println("Please write the non-gui functionality");
 
-            }
+            //}
         }
 
     }
