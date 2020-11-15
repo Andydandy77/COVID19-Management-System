@@ -32,7 +32,7 @@ public class QueryRunner {
 
         // You will need to put your Project Application in the below variable
 
-        this.m_projectTeamApplication="CITYELECTION";    // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
+        this.m_projectTeamApplication="COVIDTRACKING";    // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 
         // Each row that is added to m_queryArray is a separate query. It does not work on Stored procedure calls.
         // The 'new' Java keyword is a way of initializing the data that will be added to QueryArray. Please do not change
@@ -44,17 +44,34 @@ public class QueryRunner {
         //    IsItActionQuery (e.g. Mark it true if it is, otherwise false)
         //    IsItParameterQuery (e.g.Mark it true if it is, otherwise false)
 
-        m_queryArray.add(new QueryData("SELECT \n" +
-                "\tresult, count(people_id) as number\n" +
-                "FROM\n" +
-                "\tPeople\n" +
-                "group by\n" +
-                "\tresult;", null, null, false, false));   // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
+        m_queryArray.add(new QueryData("SELECT pi.lname, pi.fname, c.date, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING (business_id)" +
+                "JOIN People p USING (people_id) JOIN Personal_Information pi USING (people_id) WHERE p.result = 'positive' ORDER BY s.state_name", null, null, false, false));        // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 
-        m_queryArray.add(new QueryData("Select * from contact where contact_id=?", new String [] {"CONTACT_ID"}, new boolean [] {false},  false, true));        // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
-        m_queryArray.add(new QueryData("Select * from contact where contact_name like ?", new String [] {"CONTACT_NAME"}, new boolean [] {true}, false, true));        // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
-        m_queryArray.add(new QueryData("insert into contact (contact_id, contact_name, contact_salary) values (?,?,?)",new String [] {"CONTACT_ID", "CONTACT_NAME", "CONTACT_SALARY"}, new boolean [] {false, false, false}, true, true));// THIS NEEDS TO CHANGE FOR YOUR APPLICATION
-        m_queryArray.add(new QueryData("insert into contact (contact_id, contact_name, contact_salary) values (?,?,?)",new String [] {"CONTACT_ID", "CONTACT_NAME", "CONTACT_SALARY"}, new boolean [] {false, false, false}, true, true));// THIS NEEDS TO CHANGE FOR YOUR APPLICATION
+        m_queryArray.add(new QueryData("SELECT COUNT(*) AS positive_visits, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING" +
+                " (business_id) JOIN People p USING (people_id) WHERE p.result = 'positive' GROUP BY b.business_id ORDER BY positive_visits DESC; ", null, null, false, false));
+
+        m_queryArray.add(new QueryData("SELECT Supply.hospital_id AS Hospital_ID, hospital_name AS Hospital_Name, inventory AS Inventory, Item_Description.item_name AS Item_Name FROM Item_Description JOIN" +
+                " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id; ", null, null, false, false));
+        m_queryArray.add(new QueryData("SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) GROUP BY state_dep_health_state_id;", null, null, false, false));
+
+        m_queryArray.add(new QueryData("SELECT status, count(people_id) as number FROM Cases group by status; ", null, null, false, false));
+
+        m_queryArray.add(new QueryData("SELECT result, count(people_id) as number FROM People group by result;  ", null, null, false, false));
+
+        m_queryArray.add(new QueryData("SELECT COUNT(case_id) AS Treatment FROM mm_cpsc502102team04.Cases WHERE status = 'recovered' AND treatment_method_id = ?", new String [] {"TREATMENT_ID"}, new boolean [] {false}, false, true));
+
+        m_queryArray.add(new QueryData("SELECT AVG(2020 - YEAR(dob)) as average_deceased_age FROM Personal_Information p JOIN Cases c USING (people_id) WHERE status = 'deceased';", null, null, false, false));
+
+        m_queryArray.add(new QueryData("SELECT s.state_name, COUNT(*) as recovered FROM Cases c JOIN State_Dep_Health s USING (state_dep_health_state_id) WHERE c.status = 'recovered' GROUP BY state_dep_health_state_id" +
+                " order by recovered DESC limit 1; ", null, null, false, false));
+
+        m_queryArray.add(new QueryData("SELECT h.hospital_name, s.item_id, s.inventory, i.item_name, i.description FROM Supply s INNER JOIN Hospitals h ON h.hospital_id = s.hospital_id " +
+                "INNER JOIN Item_Description i ON i.item_id = s.item_id WHERE s.inventory <= ? ", new String [] {"LOW INVENTORY"}, new boolean [] {false}, false, true));
+
+
+        // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
+//        m_queryArray.add(new QueryData("insert into contact (contact_id, contact_name, contact_salary) values (?,?,?)",new String [] {"CONTACT_ID", "CONTACT_NAME", "CONTACT_SALARY"}, new boolean [] {false, false, false}, true, true));// THIS NEEDS TO CHANGE FOR YOUR APPLICATION
+//        m_queryArray.add(new QueryData("insert into contact (contact_id, contact_name, contact_salary) values (?,?,?)",new String [] {"CONTACT_ID", "CONTACT_NAME", "CONTACT_SALARY"}, new boolean [] {false, false, false}, true, true));// THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 
     }
 
@@ -189,7 +206,7 @@ public class QueryRunner {
         Console con = System.console();
         String hostname;
         final QueryRunner queryrunner = new QueryRunner();
-        boolean console = true;
+        boolean console = false;
         //if (args.length == 0)
         if (console == false)
         {
