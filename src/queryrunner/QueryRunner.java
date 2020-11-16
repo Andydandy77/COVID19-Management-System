@@ -59,7 +59,12 @@ public class QueryRunner {
 
         m_queryArray.add(new QueryData("SELECT result, count(people_id) as number FROM People group by result;  ", null, null, false, false));
 
-        m_queryArray.add(new QueryData("SELECT COUNT(case_id) AS Treatment FROM Cases WHERE status = 'recovered' AND treatment_method_id = ?", new String [] {"TREATMENT_ID"}, new boolean [] {false}, false, true));
+        m_queryArray.add(new QueryData("SELECT Count_Suc, Count_All, Count_Suc / Count_All AS Suc_rate, " +
+                "Treatments.treatment_method_id, treatment_name FROM (SELECT COUNT(treatment_method_id) AS Count_Suc, " +
+                "treatment_method_id FROM Cases WHERE status = 'recovered' GROUP BY treatment_method_id) AS x JOIN " +
+                "(SELECT COUNT(treatment_method_id) AS Count_All, treatment_method_id FROM Cases GROUP BY treatment_method_id) " +
+                "AS y ON x.treatment_method_id = y.treatment_method_id JOIN Treatments ON y.treatment_method_id = " +
+                "Treatments.treatment_method_id;\n", new String [] {}, new boolean [] {false}, false, true));
 
         m_queryArray.add(new QueryData("SELECT AVG(2020 - YEAR(dob)) as average_deceased_age FROM Personal_Information p JOIN Cases c USING (people_id) WHERE status = 'deceased';", null, null, false, false));
 
@@ -71,7 +76,9 @@ public class QueryRunner {
 
         m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `date`, `checkins_id`) values(?,?,?,?)",new String [] {"people_id", "business_id", "date", "checkins_id"}, new boolean [] {false, false, false}, true, true));
 
-        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?) and (`people_id` = ?)",new String [] {"status", "case_id", "people_id"}, new boolean [] {false, false, false}, true, true));
+        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false, false}, true, true));
+
+        m_queryArray.add(new QueryData("SELECT status, lname, fname, people_id FROM Cases join Personal_Information using(people_id) where (people_id = ?)",new String [] {"people_id"}, new boolean [] {false}, true, true));
 
 
         // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
