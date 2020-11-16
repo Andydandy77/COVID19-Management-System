@@ -69,6 +69,10 @@ public class QueryRunner {
         m_queryArray.add(new QueryData("SELECT h.hospital_name, s.item_id, s.inventory, i.item_name, i.description FROM Supply s INNER JOIN Hospitals h ON h.hospital_id = s.hospital_id " +
                 "INNER JOIN Item_Description i ON i.item_id = s.item_id WHERE s.inventory <= ? ", new String [] {"LOW INVENTORY"}, new boolean [] {false}, false, true));
 
+        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `date`, `checkins_id`) values(?,?,?,?)",new String [] {"people_id", "business_id", "date", "checkins_id"}, new boolean [] {false, false, false}, true, true));
+
+        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?) and (`people_id` = ?)",new String [] {"status", "case_id", "people_id"}, new boolean [] {false, false, false}, true, true));
+
 
         // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 //        m_queryArray.add(new QueryData("insert into contact (contact_id, contact_name, contact_salary) values (?,?,?)",new String [] {"CONTACT_ID", "CONTACT_NAME", "CONTACT_SALARY"}, new boolean [] {false, false, false}, true, true));// THIS NEEDS TO CHANGE FOR YOUR APPLICATION
