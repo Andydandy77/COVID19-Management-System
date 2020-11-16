@@ -52,7 +52,7 @@ public class QueryRunner {
                 " (business_id) JOIN People p USING (people_id) WHERE p.result = 'positive' GROUP BY b.business_id ORDER BY positive_visits DESC; ", null, null, false, false));
 
         m_queryArray.add(new QueryData("SELECT Supply.hospital_id AS Hospital_ID, hospital_name AS Hospital_Name, inventory AS Inventory, Item_Description.item_name AS Item_Name FROM Item_Description JOIN" +
-                " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id; ", null, null, false, false));
+                " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id where Hospital_Name like ?", new String [] {"Hospital_Name"}, new boolean [] {false}, false, true));
         m_queryArray.add(new QueryData("SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) GROUP BY state_dep_health_state_id;", null, null, false, false));
 
         m_queryArray.add(new QueryData("SELECT status, count(people_id) as number FROM Cases group by status; ", null, null, false, false));
@@ -74,11 +74,13 @@ public class QueryRunner {
         m_queryArray.add(new QueryData("SELECT h.hospital_name, s.item_id, s.inventory, i.item_name, i.description FROM Supply s INNER JOIN Hospitals h ON h.hospital_id = s.hospital_id " +
                 "INNER JOIN Item_Description i ON i.item_id = s.item_id WHERE s.inventory <= ? ", new String [] {"LOW INVENTORY"}, new boolean [] {false}, false, true));
 
-        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `date`, `checkins_id`) values(?,?,?,?)",new String [] {"people_id", "business_id", "date", "checkins_id"}, new boolean [] {false, false, false}, true, true));
+        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `date`) values(?,?,?)",new String [] {"people_id", "business_id", "date"}, new boolean [] {false, false, false, false}, true, true));
 
-        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false, false}, true, true));
+        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false}, true, true));
 
-        m_queryArray.add(new QueryData("SELECT status, lname, fname, people_id FROM Cases join Personal_Information using(people_id) where (people_id = ?)",new String [] {"people_id"}, new boolean [] {false}, true, true));
+        m_queryArray.add(new QueryData("SELECT Cases.case_id, Cases.status, Personal_Information.lname, " +
+                "Personal_Information.fname, Personal_Information.people_id FROM Cases join Personal_Information " +
+                "using(people_id) where case_id = ?",new String [] {"case_id"}, new boolean [] {false}, false, true));
 
 
         // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
