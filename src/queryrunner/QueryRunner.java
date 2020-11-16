@@ -69,9 +69,9 @@ public class QueryRunner {
         m_queryArray.add(new QueryData("SELECT h.hospital_name, s.item_id, s.inventory, i.item_name, i.description FROM Supply s INNER JOIN Hospitals h ON h.hospital_id = s.hospital_id " +
                 "INNER JOIN Item_Description i ON i.item_id = s.item_id WHERE s.inventory <= ? ", new String [] {"LOW INVENTORY"}, new boolean [] {false}, false, true));
 
-        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `date`, `checkins_id`) values(?,?,?,?)",new String [] {"people_id", "business_id", "date", "checkins_id"}, new boolean [] {false, false, false}, true, true));
+        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `date`) values(?,?,?)",new String [] {"people_id", "business_id", "date (YYYY-MM-DD hh:mm:ss)"}, new boolean [] {false, false, false}, true, true));
 
-        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?) and (`people_id` = ?)",new String [] {"status", "case_id", "people_id"}, new boolean [] {false, false, false}, true, true));
+        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false}, true, true));
 
 
         // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
@@ -214,28 +214,45 @@ public class QueryRunner {
         System.out.print("Query to run: ");
         int queryNum = Integer.parseInt(userIn.nextLine());
 
-        if (this.isParameterQuery(queryNum)) {
+        if (this.isParameterQuery(queryNum - 1)) {
+            int nAmt = this.GetParameterAmtForQuery(queryNum - 1);
+            parmstring = new String [nAmt];
+            for (int i = 0; i < nAmt; i++) {
+                System.out.print("Value for " + this.GetParamText(queryNum - 1, i) + ": ");
+                parmstring[i] = userIn.nextLine();
+            }
+        }
 
-
-        } else if (this.isActionQuery(queryNum)) {
-
+        if (this.isActionQuery(queryNum - 1)) {
+            Ok = this.ExecuteUpdate(queryNum - 1, parmstring);
+            if (Ok) {
+                System.out.println("Rows affected = " + this.GetUpdateAmount());
+            } else {
+                System.out.println("ERROR: UNABLE TO UPDATE");
+            }
 
         } else {
-            Ok = this.ExecuteQuery(queryNum, parmstring);
-        }
-        if (Ok) {
-            headers = this.GetQueryHeaders();
-            allData = this.GetQueryData();
+            Ok = this.ExecuteQuery(queryNum - 1, parmstring);
 
-            CommandLineTable results = new CommandLineTable();
-            results.setShowVerticalLines(true);
-            results.setHeaders(headers);
-            int numResults = allData.length;
-            for (int j = 0; j < numResults; j++) {
-                results.addRow(allData[j]);
+            if (Ok) {
+                headers = this.GetQueryHeaders();
+                allData = this.GetQueryData();
+
+                CommandLineTable results = new CommandLineTable();
+                results.setShowVerticalLines(true);
+                results.setHeaders(headers);
+                int numResults = allData.length;
+                for (int j = 0; j < numResults; j++) {
+                    results.addRow(allData[j]);
+                }
+                results.print();
+            } else {
+                System.out.println("ERROR: UNABLE TO EXEXCUTE QUERY");
+
             }
-            results.print();
         }
+
+
     }
 
 
@@ -268,7 +285,6 @@ public class QueryRunner {
         } else {
             if (args[0].equals("-console")) {
 
-                //System.out.println("Nothing has been implemented yet. Please implement the necessary code");
                 System.out.println("Connect to database using console");
                 boolean connect = queryrunner.Connect("", "", "", "");
                 if (!connect) {
@@ -288,8 +304,10 @@ public class QueryRunner {
 
                     System.out.print("Type 'exit' to quit, anything else to continue: ");
                     while (!userIn.nextLine().equals("exit")){
+                        queryrunner.ShowQueries();
                         queryrunner.RunUserInputQuery();
                         System.out.print("Type 'exit' to quit, anything else to continue: ");
+
 
                     }
                     System.out.println("Thanks for using the COVID Tracking system!");
