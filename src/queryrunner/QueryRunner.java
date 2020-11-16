@@ -45,14 +45,14 @@ public class QueryRunner {
         //    IsItActionQuery (e.g. Mark it true if it is, otherwise false)
         //    IsItParameterQuery (e.g.Mark it true if it is, otherwise false)
 
-        m_queryArray.add(new QueryData("SELECT pi.lname, pi.fname, c.date, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING (business_id)" +
+        m_queryArray.add(new QueryData("SELECT pi.lname, pi.fname, c.checkin_date, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING (business_id)" +
                 "JOIN People p USING (people_id) JOIN Personal_Information pi USING (people_id) WHERE p.result = 'positive' ORDER BY s.state_name", null, null, false, false));        // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 
         m_queryArray.add(new QueryData("SELECT COUNT(*) AS positive_visits, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING" +
                 " (business_id) JOIN People p USING (people_id) WHERE p.result = 'positive' GROUP BY b.business_id ORDER BY positive_visits DESC; ", null, null, false, false));
 
         m_queryArray.add(new QueryData("SELECT Supply.hospital_id AS Hospital_ID, hospital_name AS Hospital_Name, inventory AS Inventory, Item_Description.item_name AS Item_Name FROM Item_Description JOIN" +
-                " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id where Hospital_Name like ?", new String [] {"Hospital_Name"}, new boolean [] {false}, false, true));
+                " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id where Hospital_Name like ? ORDER BY Hospital_ID;", new String [] {"Hospital_Name (like)"}, new boolean [] {false}, false, true));
         m_queryArray.add(new QueryData("SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) GROUP BY state_dep_health_state_id;", null, null, false, false));
 
         m_queryArray.add(new QueryData("SELECT status, count(people_id) as number FROM Cases group by status; ", null, null, false, false));
@@ -75,7 +75,7 @@ public class QueryRunner {
                 "INNER JOIN Item_Description i ON i.item_id = s.item_id WHERE s.inventory <= ? ", new String [] {"LOW INVENTORY"}, new boolean [] {false}, false, true));
 
 
-        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `date`) values(?,?,?)",new String [] {"people_id", "business_id", "date"}, new boolean [] {false, false, false, false}, true, true));
+        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `checkin_date`) values(?,?,?)",new String [] {"people_id", "business_id", "checkin_date YYYY-MM-DD hh:mm:ss"}, new boolean [] {false, false, false, false}, true, true));
 
         m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false}, true, true));
 
@@ -224,45 +224,64 @@ public class QueryRunner {
         System.out.print("Query to run: ");
         int queryNum = Integer.parseInt(userIn.nextLine());
 
-        if (this.isParameterQuery(queryNum - 1)) {
-            int nAmt = this.GetParameterAmtForQuery(queryNum - 1);
-            parmstring = new String [nAmt];
-            for (int i = 0; i < nAmt; i++) {
-                System.out.print("Value for " + this.GetParamText(queryNum - 1, i) + ": ");
-                parmstring[i] = userIn.nextLine();
-            }
-        }
-
-        if (this.isActionQuery(queryNum - 1)) {
-            Ok = this.ExecuteUpdate(queryNum - 1, parmstring);
-            if (Ok) {
-                System.out.println("Rows affected = " + this.GetUpdateAmount());
-            } else {
-                System.out.println("ERROR: UNABLE TO UPDATE");
-            }
-
+        if (queryNum > m_queryArray.size()) {
+            System.out.println("Error: User input query number does not exist");
         } else {
-            Ok = this.ExecuteQuery(queryNum - 1, parmstring);
 
-            if (Ok) {
-                headers = this.GetQueryHeaders();
-                allData = this.GetQueryData();
-
-                CommandLineTable results = new CommandLineTable();
-                results.setShowVerticalLines(true);
-                results.setHeaders(headers);
-                int numResults = allData.length;
-                for (int j = 0; j < numResults; j++) {
-                    results.addRow(allData[j]);
+            if (this.isParameterQuery(queryNum - 1)) {
+                int nAmt = this.GetParameterAmtForQuery(queryNum - 1);
+                parmstring = new String[nAmt];
+                for (int i = 0; i < nAmt; i++) {
+                    System.out.print("Value for " + this.GetParamText(queryNum - 1, i) + ": ");
+                    parmstring[i] = userIn.nextLine();
                 }
-                results.print();
-            } else {
-                System.out.println("ERROR: UNABLE TO EXEXCUTE QUERY");
+            }
 
+            if (this.isActionQuery(queryNum - 1)) {
+                if (queryNum == 12 && !parmstring[0].equals("deceased") && !parmstring[0].equals("recovered") && !parmstring[0].equals("active")) {
+                    System.out.println("Case can only be updated with status of 'deceased', 'recovered', or 'active'");
+                } else {
+                    Ok = this.ExecuteUpdate(queryNum - 1, parmstring);
+                    if (Ok) {
+                        if (this.GetUpdateAmount() == 0) {
+                            System.out.println("Error: No rows updated");
+                        } else {
+                            System.out.println("Rows affected = " + this.GetUpdateAmount());
+                        }
+                    } else {
+                        System.out.println("Error: Action Query failed");
+                    }
+                }
+
+
+            } else {
+                Ok = this.ExecuteQuery(queryNum - 1, parmstring);
+
+                if (Ok) {
+
+                    headers = this.GetQueryHeaders();
+                    allData = this.GetQueryData();
+
+                    if (allData[0][0].equals("")) {
+                        System.out.println("Error: No results for given query");
+
+                    } else {
+
+                        CommandLineTable results = new CommandLineTable();
+                        results.setShowVerticalLines(true);
+                        results.setHeaders(headers);
+                        int numResults = allData.length;
+                        for (int j = 0; j < numResults; j++) {
+                            results.addRow(allData[j]);
+                        }
+                        results.print();
+                    }
+                } else {
+                    System.out.println("Error: Execute Query failed");
+
+                }
             }
         }
-
-
     }
 
 
