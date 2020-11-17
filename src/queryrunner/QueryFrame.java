@@ -35,44 +35,51 @@ public class QueryFrame extends javax.swing.JFrame {
 
         for (int i=0; i < nAmt; i++) {
             if(i == 0){
-                this.jComboBoxQuery.addItem("Show all active patients");
+                this.jComboBoxQuery.addItem("Show Positive Checkins");
             }
             else if (i == 1){
-                this.jComboBoxQuery.addItem("Show high risk places");
+                this.jComboBoxQuery.addItem("Show High Risk Businesses");
             }
             else if (i == 2){
                 this.jComboBoxQuery.addItem("Hospital Inventory");
             }
             else if (i == 3){
-                this.jComboBoxQuery.addItem("Active by State");
+                this.jComboBoxQuery.addItem("Tests by State");
             }
             else if (i == 4){
-                this.jComboBoxQuery.addItem("Current case static");
+                this.jComboBoxQuery.addItem("Case Statistics");
             }
             else if (i == 5){
-                this.jComboBoxQuery.addItem("Current positive static");
+                this.jComboBoxQuery.addItem("Testing Statistics");
             }
             else if (i == 6){
-                this.jComboBoxQuery.addItem("Treatment static");
+                this.jComboBoxQuery.addItem("Treatment Statistics");
             }
             else if (i == 7){
-                this.jComboBoxQuery.addItem("Average death age");
+                this.jComboBoxQuery.addItem("Average Age of Death");
             }
             else if (i == 8){
-                this.jComboBoxQuery.addItem("Highest recovery State");
+                this.jComboBoxQuery.addItem("Highest Recovery State");
             }
             else if (i == 9){
                 this.jComboBoxQuery.addItem("Inventory check");
             }
             else if (i == 10){
-                this.jComboBoxQuery.addItem("Check-in");
+                this.jComboBoxQuery.addItem("Create Check-in");
             }
             else if (i == 11){
-                this.jComboBoxQuery.addItem("Status update");
+                this.jComboBoxQuery.addItem("Case Update");
             }
             else if (i == 12){
                 this.jComboBoxQuery.addItem("Patient Status");
-            } else{
+            }
+            else if (i == 13) {
+                this.jComboBoxQuery.addItem("Get Contact Tracer");
+            }
+            else if (i == 14) {
+                this.jComboBoxQuery.addItem("Search by State");
+            }
+            else{
                 this.jComboBoxQuery.addItem("Query " + (i + 1));
             }
 
@@ -317,44 +324,52 @@ public class QueryFrame extends javax.swing.JFrame {
         String szChoice = (String)jComboBoxQuery.getSelectedItem();
 
         String szStripChoice;
-        if(szChoice.equals("Show all active patients")){
-            szChoice ="Query 1";
-        }
-        else if (szChoice.equals("Show high risk places")){
-            szChoice ="Query 2";
-        }
-        else if (szChoice.equals("Hospital Inventory")){
-            szChoice ="Query 3";
-        }
-        else if (szChoice.equals("Active by State")){
-            szChoice ="Query 4";
-        }
-        else if (szChoice.equals("Current case static")){
-            szChoice ="Query 5";
-        }
-        else if (szChoice.equals("Current positive static")){
-            szChoice ="Query 6";
-        }
-        else if (szChoice.equals("Treatment static")){
-            szChoice ="Query 7";
-        }
-        else if (szChoice.equals("Average death age")){
-            szChoice ="Query 8";
-        }
-        else if (szChoice.equals("Highest recovery State")){
-            szChoice ="Query 9";
-        }
-        else if (szChoice.equals("Inventory check")){
-            szChoice ="Query 10";
-        }
-        else if (szChoice.equals("Check-in")){
-            szChoice ="Query 11";
-        }
-        else if (szChoice.equals("Status update")){
-            szChoice ="Query 12";
-        }
-        else if (szChoice.equals("Patient Status")){
-            szChoice ="Query 13";
+        switch (szChoice) {
+            case "Show Positive Checkins":
+                szChoice = "Query 1";
+                break;
+            case "Show High Risk Businesses":
+                szChoice = "Query 2";
+                break;
+            case "Hospital Inventory":
+                szChoice = "Query 3";
+                break;
+            case "Tests by State":
+                szChoice = "Query 4";
+                break;
+            case "Case Statistics":
+                szChoice = "Query 5";
+                break;
+            case "Testing Statistics":
+                szChoice = "Query 6";
+                break;
+            case "Treatment Statistics":
+                szChoice = "Query 7";
+                break;
+            case "Average Age of Death":
+                szChoice = "Query 8";
+                break;
+            case "Highest Recovery State":
+                szChoice = "Query 9";
+                break;
+            case "Inventory check":
+                szChoice = "Query 10";
+                break;
+            case "Create Checkin":
+                szChoice = "Query 11";
+                break;
+            case "Case Update":
+                szChoice = "Query 12";
+                break;
+            case "Patient Status":
+                szChoice = "Query 13";
+                break;
+            case "Get Contact Tracer":
+                szChoice = "Query 14";
+                break;
+            case "Search by State":
+                szChoice = "Query 15";
+                break;
         }
 
         szStripChoice = szChoice.substring(6);
