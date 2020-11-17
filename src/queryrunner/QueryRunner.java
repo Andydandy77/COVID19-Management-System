@@ -52,7 +52,7 @@ public class QueryRunner {
                 " (business_id) JOIN People p USING (people_id) WHERE p.result = 'positive' GROUP BY b.business_id ORDER BY positive_visits DESC; ", null, null, false, false));
 
         m_queryArray.add(new QueryData("SELECT Supply.hospital_id AS Hospital_ID, hospital_name AS Hospital_Name, inventory AS Inventory, Item_Description.item_name AS Item_Name FROM Item_Description JOIN" +
-                " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id where Hospital_Name like ? ORDER BY Hospital_ID;", new String [] {"Hospital_Name (like)"}, new boolean [] {false}, false, true));
+                " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id where Hospital_Name like ? ORDER BY Hospital_ID;", new String [] {"Hospital_Name (like)"}, new boolean [] {true}, false, true));
         m_queryArray.add(new QueryData("SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) GROUP BY state_dep_health_state_id;", null, null, false, false));
 
         m_queryArray.add(new QueryData("SELECT status, count(people_id) as number FROM Cases group by status; ", null, null, false, false));
@@ -75,18 +75,14 @@ public class QueryRunner {
                 "INNER JOIN Item_Description i ON i.item_id = s.item_id WHERE s.inventory <= ? ", new String [] {"LOW INVENTORY"}, new boolean [] {false}, false, true));
 
 
-        m_queryArray.add(new QueryData("INSERT INTO `Checkins` (`people_id`, `business_id`, `checkin_date`) values(?,?,?)",new String [] {"people_id", "business_id", "checkin_date YYYY-MM-DD hh:mm:ss"}, new boolean [] {false, false, false, false}, true, true));
+        m_queryArray.add(new QueryData("INSERT INTO Checkins (people_id, business_id, checkin_date) values(?,?,?)",new String [] {"people_id", "business_id", "checkin_date YYYY-MM-DD hh:mm:ss"}, new boolean [] {false, false, false, false}, true, true));
 
-        m_queryArray.add(new QueryData("UPDATE `Cases` SET `status` = ? WHERE (`case_id` = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false}, true, true));
+        m_queryArray.add(new QueryData("UPDATE Cases SET status = ? WHERE (case_id = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false}, true, true));
 
         m_queryArray.add(new QueryData("SELECT Cases.case_id, Cases.status, Personal_Information.lname, " +
                 "Personal_Information.fname, Personal_Information.people_id FROM Cases join Personal_Information " +
                 "using(people_id) where case_id = ?",new String [] {"case_id"}, new boolean [] {false}, false, true));
 
-
-        // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
-//        m_queryArray.add(new QueryData("insert into contact (contact_id, contact_name, contact_salary) values (?,?,?)",new String [] {"CONTACT_ID", "CONTACT_NAME", "CONTACT_SALARY"}, new boolean [] {false, false, false}, true, true));// THIS NEEDS TO CHANGE FOR YOUR APPLICATION
-//        m_queryArray.add(new QueryData("insert into contact (contact_id, contact_name, contact_salary) values (?,?,?)",new String [] {"CONTACT_ID", "CONTACT_NAME", "CONTACT_SALARY"}, new boolean [] {false, false, false}, true, true));// THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 
     }
 
@@ -221,8 +217,57 @@ public class QueryRunner {
         boolean Ok=true;
 
         Scanner userIn = new Scanner(System.in);
-        System.out.print("Query to run: ");
-        int queryNum = Integer.parseInt(userIn.nextLine());
+        System.out.print("Query to run (type custom for custom query to add): ");
+        String argument = userIn.nextLine();
+        while(argument.equals("custom")) {
+            System.out.print("Type SQL Statement: ");
+            String SQLStatement = userIn.nextLine();
+            System.out.print("Does the query have parameters? (y/n) ");
+            boolean isParam = userIn.nextLine().equals("y");
+            System.out.print("Is the query an action query? (y/n) ");
+            boolean isAction = userIn.nextLine().equals("y");
+            String[] param = null;
+            boolean[] likeparam = null;
+            if (isParam) {
+                System.out.print("Type parameter names with spaces delimiting them: ");
+                String paramString = userIn.nextLine();
+                if (!paramString.contains(" ")) {
+                    param = new String[] {null};
+                    param[0] = paramString;
+                } else {
+                    param = paramString.split(" ");
+                }
+                likeparam = new boolean[param.length];
+                for (int i = 0; i < likeparam.length; i++) {
+                    likeparam[i] = false;
+                }
+                System.out.print("Are any parameters 'like'? (y/n) ");
+
+                if (userIn.nextLine().equals("y")) {
+                    System.out.print("What index is the parameter (first parameter has index of 0, space indexes): ");
+                    String likeString = userIn.nextLine();
+                    if (!likeString.contains(" ")) {
+                        likeparam[Integer.parseInt(likeString)] = true;
+                    } else {
+                        String[] stringLikeArr = likeString.split(" ");
+                        for (int j = 0; j < stringLikeArr.length; j++) {
+                            if (!isParsable(stringLikeArr[j]) ||  Integer.parseInt(stringLikeArr[j]) >= param.length) {
+                                System.out.println("Error: enter integer values less than number of params");
+                                break;
+                            }
+                            likeparam[Integer.parseInt(stringLikeArr[j])] = true;
+                        }
+                    }
+                }
+
+            }
+            m_queryArray.add(new QueryData(SQLStatement, param, likeparam, isAction, isParam));
+            this.ShowQueries();
+            System.out.print("Query to run (type custom for custom query to add): ");
+            argument = userIn.next();
+
+        }
+        int queryNum = Integer.parseInt(argument);
 
         if (queryNum > m_queryArray.size()) {
             System.out.println("Error: User input query number does not exist");
@@ -233,7 +278,7 @@ public class QueryRunner {
                 parmstring = new String[nAmt];
                 for (int i = 0; i < nAmt; i++) {
                     System.out.print("Value for " + this.GetParamText(queryNum - 1, i) + ": ");
-                    parmstring[i] = userIn.nextLine();
+                    parmstring[i] = userIn.next();
                 }
             }
 
@@ -281,6 +326,17 @@ public class QueryRunner {
 
                 }
             }
+        }
+
+
+    }
+
+    public static boolean isParsable(String input) {
+        try {
+            Integer.parseInt(input);
+            return true;
+        } catch (final NumberFormatException e) {
+            return false;
         }
     }
 
