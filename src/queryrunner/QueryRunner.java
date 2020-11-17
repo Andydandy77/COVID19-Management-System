@@ -63,7 +63,7 @@ public class QueryRunner {
                 "treatment_method_id FROM Cases WHERE status = 'recovered' GROUP BY treatment_method_id) AS x JOIN " +
                 "(SELECT COUNT(treatment_method_id) AS Count_All, treatment_method_id FROM Cases GROUP BY treatment_method_id) " +
                 "AS y ON x.treatment_method_id = y.treatment_method_id JOIN Treatments ON y.treatment_method_id = " +
-                "Treatments.treatment_method_id;\n", new String [] {}, new boolean [] {false}, false, true));
+                "Treatments.treatment_method_id;", new String [] {}, new boolean [] {false}, false, true));
 
         m_queryArray.add(new QueryData("SELECT AVG(2020 - YEAR(dob)) as average_deceased_age FROM Personal_Information p JOIN Cases c USING (people_id) WHERE status = 'deceased';", null, null, false, false));
 
@@ -208,9 +208,7 @@ public class QueryRunner {
     }
 
     public void ShowQueries() {
-        System.out.println("Connected to Database!");
-        System.out.println("Queries displayed below: \n");
-
+        System.out.println("\nQueries displayed below: \n");
 
         for (int i = 0; i < this.GetTotalQueries(); i++) {
             System.out.println(i + 1 + ". " + this.GetQueryText(i));
@@ -274,6 +272,10 @@ public class QueryRunner {
             System.out.print("Query to run (type custom for custom query to add): ");
             argument = userIn.next();
 
+        }
+        if(!isParsable(argument)) {
+            System.out.println("Error: Either enter in a query number or 'custom'");
+            return;
         }
         int queryNum = Integer.parseInt(argument);
 
@@ -385,11 +387,9 @@ public class QueryRunner {
 
                 } else {
 
+                    System.out.println("\nConnected to Database!\n");
+
                     queryrunner.ShowQueries();
-                    String[] parmstring = {};
-                    String[] headers;
-                    String[][] allData;
-                    boolean Ok = true;
 
                     queryrunner.RunUserInputQuery();
 
@@ -406,49 +406,8 @@ public class QueryRunner {
                     System.out.println("Thanks for using the COVID Tracking system!");
 
 
-                        // TODO
-                        // You should code the following functionality:
-
-                        //    You need to determine if it is a parameter query. If it is, then
-                        //    you will need to ask the user to put in the values for the Parameters in your query
-                        //    you will then call ExecuteQuery or ExecuteUpdate (depending on whether it is an action query or regular query)
-                        //    if it is a regular query, you should then get the data by calling GetQueryData. You should then display this
-                        //    output.
-                        //    If it is an action query, you will tell how many row's were affected by it.
-                        //
-                        //    This is Psuedo Code for the task:
-                        //    Connect()
-                        //    n = GetTotalQueries()
-                        //    for (i=0;i < n; i++)
-                        //    {
-                        //       Is it a query that Has Parameters
-                        //       Then
-                        //           amt = find out how many parameters it has
-                        //           Create a paramter array of strings for that amount
-                        //           for (j=0; j< amt; j++)
-                        //              Get The Paramater Label for Query and print it to console. Ask the user to enter a value
-                        //              Take the value you got and put it into your parameter array
-                        //           If it is an Action Query then
-                        //              call ExecuteUpdate to run the Query
-                        //              call GetUpdateAmount to find out how many rows were affected, and print that value
-                        //           else
-                        //               call ExecuteQuery
-                        //               call GetQueryData to get the results back
-                        //               print out all the results
-                        //           end if
-                        //      }
-                        //    Disconnect()
-
-
-                        // NOTE - IF THERE ARE ANY ERRORS, please print the Error output
-                        // NOTE - The QueryRunner functions call the various JDBC Functions that are in QueryJDBC. If you would rather code JDBC
-                        // functions directly, you can choose to do that. It will be harder, but that is your option.
-                        // NOTE - You can look at the QueryRunner API calls that are in QueryFrame.java for assistance. You should not have to
-                        //    alter any code in QueryJDBC, QueryData, or QueryFrame to make this work.
-//                System.out.println("Please write the non-gui functionality");
-
-                    }
                 }
             }
         }
     }
+}
