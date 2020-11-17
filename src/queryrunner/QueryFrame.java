@@ -277,8 +277,7 @@ public class QueryFrame extends javax.swing.JFrame {
     * @param evt 
     */
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        boolean  bOK=true; 
+        boolean  bOK=true;
         jTextArea2.setText("");      
         
         if (jConnectButton.getText() == "Connect")

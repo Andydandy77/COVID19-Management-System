@@ -224,11 +224,12 @@ public class QueryJDBC {
         
         return true;
     }
-    
 
-    /* Document this function
-    // TODO    
-    */
+
+    /**
+     * Disconnect from the database
+     * @return true if disconnect was successful, false otherwise
+     */
     public boolean CloseDatabase()
     {        
         try 

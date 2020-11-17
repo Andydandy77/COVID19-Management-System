@@ -12,14 +12,7 @@ import java.util.ArrayList;
  * @author mckeem
  */
 public class QueryData {
-     QueryData()
-    {
-    }
-//    QueryData(String query)
-//    {
-//        m_queryString = query;
-//    }
-    
+
     QueryData(String description, String query, String[] parms, boolean [] likeparms, boolean isAction, boolean isParm)
     {
         m_queryDescription = description;
@@ -29,14 +22,7 @@ public class QueryData {
         m_isAction = isAction;
         m_isParms = isParm;        
     }
-    
-//    void Set(String query, ArrayList<String>parms, boolean isAction, boolean isParm)
-//    {
-//        m_queryString = query;
-//        m_arrayParms = parms;
-//        m_isAction = isAction;
-//        m_isParms = isParm;
-//    }
+
     
     String GetQueryString()
     {
