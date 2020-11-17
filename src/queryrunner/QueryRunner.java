@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import queryrunner.CommandLineTable;
 
+import javax.management.Query;
+
 /**
  *
  * QueryRunner takes a list of Queries that are initialized in it's constructor
@@ -29,9 +31,6 @@ public class QueryRunner {
         m_error="";
 
 
-        // TODO - You will need to change the queries below to match your queries.
-
-        // You will need to put your Project Application in the below variable
 
         this.m_projectTeamApplication="COVIDTRACKING";    // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 
@@ -83,6 +82,14 @@ public class QueryRunner {
                 "Personal_Information.fname, Personal_Information.people_id FROM Cases join Personal_Information " +
                 "using(people_id) where case_id = ?",new String [] {"case_id"}, new boolean [] {false}, false, true));
 
+        String tracingParam = "people_id (which person you want to know may have had contact, same as others)";
+        m_queryArray.add(new QueryData("SELECT Checkins.business_id, Checkins.checkin_date, Cases.date_diagnosed, Cases.people_id FROM Cases JOIN People USING (people_id) JOIN Checkins ON " +
+                "Checkins.people_id = People.people_id AND (Checkins.business_id IN (SELECT business_id FROM Checkins WHERE people_id = ?)) AND (CAST(Checkins.checkin_date AS DATE) IN" +
+                " (SELECT CAST(Checkins.checkin_date AS DATE) FROM Checkins WHERE people_id = ?)) AND Cases.people_id <> ? AND CAST(Cases.date_diagnosed AS DATE) - CAST(Checkins.checkin_date AS DATE)" +
+                " <= 14;", new String[] {tracingParam, tracingParam, tracingParam}, new boolean[] {false, false, false}, false, true ));
+
+        m_queryArray.add(new QueryData("SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) " +
+                "where s.state_name like ? GROUP BY s.state_name; ", new String[] {"state_name like"}, new boolean[] {true}, false, true));
 
     }
 
@@ -208,6 +215,7 @@ public class QueryRunner {
         for (int i = 0; i < this.GetTotalQueries(); i++) {
             System.out.println(i + 1 + ". " + this.GetQueryText(i));
         }
+        System.out.println();
     }
 
     public void RunUserInputQuery() {
