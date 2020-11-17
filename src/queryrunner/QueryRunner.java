@@ -44,51 +44,51 @@ public class QueryRunner {
         //    IsItActionQuery (e.g. Mark it true if it is, otherwise false)
         //    IsItParameterQuery (e.g.Mark it true if it is, otherwise false)
 
-        m_queryArray.add(new QueryData("SELECT pi.lname, pi.fname, c.checkin_date, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING (business_id)" +
+        m_queryArray.add(new QueryData("Show Positive Checkins", "SELECT pi.lname, pi.fname, c.checkin_date, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING (business_id)" +
                 "JOIN People p USING (people_id) JOIN Personal_Information pi USING (people_id) WHERE p.result = 'positive' ORDER BY s.state_name", null, null, false, false));        // THIS NEEDS TO CHANGE FOR YOUR APPLICATION
 
-        m_queryArray.add(new QueryData("SELECT COUNT(*) AS positive_visits, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING" +
+        m_queryArray.add(new QueryData("Show High Risk Businesses","SELECT COUNT(*) AS positive_visits, b.business_name, s.state_name FROM State_Dep_Health s JOIN Businesses b USING (state_dep_health_state_id) JOIN Checkins c USING" +
                 " (business_id) JOIN People p USING (people_id) WHERE p.result = 'positive' GROUP BY b.business_id ORDER BY positive_visits DESC; ", null, null, false, false));
 
-        m_queryArray.add(new QueryData("SELECT Supply.hospital_id AS Hospital_ID, hospital_name AS Hospital_Name, inventory AS Inventory, Item_Description.item_name AS Item_Name FROM Item_Description JOIN" +
+        m_queryArray.add(new QueryData("Hospital Inventory","SELECT Supply.hospital_id AS Hospital_ID, hospital_name AS Hospital_Name, inventory AS Inventory, Item_Description.item_name AS Item_Name FROM Item_Description JOIN" +
                 " Supply ON Item_Description.item_id = Supply.item_id JOIN Hospitals ON Hospitals.hospital_id = Supply.hospital_id where Hospital_Name like ? ORDER BY Hospital_ID;", new String [] {"Hospital_Name (like)"}, new boolean [] {true}, false, true));
-        m_queryArray.add(new QueryData("SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) GROUP BY state_dep_health_state_id;", null, null, false, false));
+        m_queryArray.add(new QueryData("Tests by State","SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) GROUP BY state_dep_health_state_id;", null, null, false, false));
 
-        m_queryArray.add(new QueryData("SELECT status, count(people_id) as number FROM Cases group by status; ", null, null, false, false));
+        m_queryArray.add(new QueryData("Case Statistics","SELECT status, count(people_id) as number FROM Cases group by status; ", null, null, false, false));
 
-        m_queryArray.add(new QueryData("SELECT result, count(people_id) as number FROM People group by result;  ", null, null, false, false));
+        m_queryArray.add(new QueryData("Testing Statistics","SELECT result, count(people_id) as number FROM People group by result;  ", null, null, false, false));
 
-        m_queryArray.add(new QueryData("SELECT Count_Suc, Count_All, Count_Suc / Count_All AS Suc_rate, " +
+        m_queryArray.add(new QueryData("Treatment Statistics","SELECT Count_Suc, Count_All, Count_Suc / Count_All AS Suc_rate, " +
                 "Treatments.treatment_method_id, treatment_name FROM (SELECT COUNT(treatment_method_id) AS Count_Suc, " +
                 "treatment_method_id FROM Cases WHERE status = 'recovered' GROUP BY treatment_method_id) AS x JOIN " +
                 "(SELECT COUNT(treatment_method_id) AS Count_All, treatment_method_id FROM Cases GROUP BY treatment_method_id) " +
                 "AS y ON x.treatment_method_id = y.treatment_method_id JOIN Treatments ON y.treatment_method_id = " +
                 "Treatments.treatment_method_id;", new String [] {}, new boolean [] {false}, false, true));
 
-        m_queryArray.add(new QueryData("SELECT AVG(2020 - YEAR(dob)) as average_deceased_age FROM Personal_Information p JOIN Cases c USING (people_id) WHERE status = 'deceased';", null, null, false, false));
+        m_queryArray.add(new QueryData("Average Age of Death","SELECT AVG(2020 - YEAR(dob)) as average_deceased_age FROM Personal_Information p JOIN Cases c USING (people_id) WHERE status = 'deceased';", null, null, false, false));
 
-        m_queryArray.add(new QueryData("SELECT s.state_name, COUNT(*) as recovered FROM Cases c JOIN State_Dep_Health s USING (state_dep_health_state_id) WHERE c.status = 'recovered' GROUP BY state_dep_health_state_id" +
+        m_queryArray.add(new QueryData("Highest Recovery State","SELECT s.state_name, COUNT(*) as recovered FROM Cases c JOIN State_Dep_Health s USING (state_dep_health_state_id) WHERE c.status = 'recovered' GROUP BY state_dep_health_state_id" +
                 " order by recovered DESC limit 1; ", null, null, false, false));
 
-        m_queryArray.add(new QueryData("SELECT h.hospital_name, s.item_id, s.inventory, i.item_name, i.description FROM Supply s INNER JOIN Hospitals h ON h.hospital_id = s.hospital_id " +
+        m_queryArray.add(new QueryData("Inventory check","SELECT h.hospital_name, s.item_id, s.inventory, i.item_name, i.description FROM Supply s INNER JOIN Hospitals h ON h.hospital_id = s.hospital_id " +
                 "INNER JOIN Item_Description i ON i.item_id = s.item_id WHERE s.inventory <= ? ", new String [] {"LOW INVENTORY"}, new boolean [] {false}, false, true));
 
 
-        m_queryArray.add(new QueryData("INSERT INTO Checkins (people_id, business_id, checkin_date) values(?,?,?)",new String [] {"people_id", "business_id", "checkin_date YYYY-MM-DD hh:mm:ss"}, new boolean [] {false, false, false, false}, true, true));
+        m_queryArray.add(new QueryData("Create Check-in","INSERT INTO Checkins (people_id, business_id, checkin_date) values(?,?,?)",new String [] {"people_id", "business_id", "checkin_date YYYY-MM-DD hh:mm:ss"}, new boolean [] {false, false, false, false}, true, true));
 
-        m_queryArray.add(new QueryData("UPDATE Cases SET status = ? WHERE (case_id = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false}, true, true));
+        m_queryArray.add(new QueryData("Case Update","UPDATE Cases SET status = ? WHERE (case_id = ?)",new String [] {"status", "case_id"}, new boolean [] {false, false}, true, true));
 
-        m_queryArray.add(new QueryData("SELECT Cases.case_id, Cases.status, Personal_Information.lname, " +
+        m_queryArray.add(new QueryData("Patient Status","SELECT Cases.case_id, Cases.status, Personal_Information.lname, " +
                 "Personal_Information.fname, Personal_Information.people_id FROM Cases join Personal_Information " +
                 "using(people_id) where case_id = ?",new String [] {"case_id"}, new boolean [] {false}, false, true));
 
         String tracingParam = "people_id (which person you want to know may have had contact, same as others)";
-        m_queryArray.add(new QueryData("SELECT Checkins.business_id, Checkins.checkin_date, Cases.date_diagnosed, Cases.people_id FROM Cases JOIN People USING (people_id) JOIN Checkins ON " +
+        m_queryArray.add(new QueryData("Get Contact Tracer","SELECT Checkins.business_id, Checkins.checkin_date, Cases.date_diagnosed, Cases.people_id FROM Cases JOIN People USING (people_id) JOIN Checkins ON " +
                 "Checkins.people_id = People.people_id AND (Checkins.business_id IN (SELECT business_id FROM Checkins WHERE people_id = ?)) AND (CAST(Checkins.checkin_date AS DATE) IN" +
                 " (SELECT CAST(Checkins.checkin_date AS DATE) FROM Checkins WHERE people_id = ?)) AND Cases.people_id <> ? AND CAST(Cases.date_diagnosed AS DATE) - CAST(Checkins.checkin_date AS DATE)" +
                 " <= 14;", new String[] {tracingParam, tracingParam, tracingParam}, new boolean[] {false, false, false}, false, true ));
 
-        m_queryArray.add(new QueryData("SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) " +
+        m_queryArray.add(new QueryData("Search by State","SELECT COUNT(*) AS Total_Tests, s.state_name FROM Tests JOIN State_Dep_Health s USING (state_dep_health_state_id) " +
                 "where s.state_name like ? GROUP BY s.state_name; ", new String[] {"state_name like"}, new boolean[] {true}, false, true));
 
     }
@@ -115,6 +115,12 @@ public class QueryRunner {
     {
         QueryData e=m_queryArray.get(queryChoice);
         return e.GetQueryString();
+    }
+
+    public String GetQueryDescription(int queryChoice)
+    {
+        QueryData e = m_queryArray.get(queryChoice);
+        return e.GetQueryDescription();
     }
 
     /**
@@ -211,7 +217,7 @@ public class QueryRunner {
         System.out.println("\nQueries displayed below: \n");
 
         for (int i = 0; i < this.GetTotalQueries(); i++) {
-            System.out.println(i + 1 + ". " + this.GetQueryText(i));
+            System.out.println(i + 1 + ". " + this.GetQueryDescription(i));
         }
         System.out.println();
     }
@@ -223,9 +229,11 @@ public class QueryRunner {
         boolean Ok=true;
 
         Scanner userIn = new Scanner(System.in);
-        System.out.print("Query to run (type custom for custom query to add): ");
+        System.out.print("Query to run (type 'custom' for custom query to add, type 'show 2' to show SQL for query 2): ");
         String argument = userIn.nextLine();
         while(argument.equals("custom")) {
+            System.out.print("Type new query description: ");
+            String description = userIn.nextLine();
             System.out.print("Type SQL Statement: ");
             String SQLStatement = userIn.nextLine();
             System.out.print("Does the query have parameters? (y/n) ");
@@ -267,11 +275,30 @@ public class QueryRunner {
                 }
 
             }
-            m_queryArray.add(new QueryData(SQLStatement, param, likeparam, isAction, isParam));
+            m_queryArray.add(new QueryData(description, SQLStatement, param, likeparam, isAction, isParam));
             this.ShowQueries();
-            System.out.print("Query to run (type custom for custom query to add): ");
+            System.out.print("Query to run (type 'custom' for custom query to add, type 'show 2' to show SQL for query 2): ");
             argument = userIn.next();
 
+        }
+
+
+        while(argument.contains("show")) {
+            String[] args = argument.split(" ");
+            int nextNum;
+            for (int i = 1; i < args.length; i++) {
+                if (!isParsable(args[i]) ) {
+                    System.out.println("Error: Enter in a valid query number");
+                } else if (Integer.parseInt(args[i]) >= m_queryArray.size()) {
+                    System.out.println("Error: User input query number does not exist");
+                } else {
+                    nextNum = Integer.parseInt(args[i]);
+                    System.out.println("SQL Statement for query number " + nextNum + ": " + this.GetQueryText(nextNum));
+                }
+            }
+            this.ShowQueries();
+            System.out.print("Query to run (type 'custom' for custom query to add, type 'show 2' to show SQL for query 2): ");
+            argument = userIn.next();
         }
         if(!isParsable(argument)) {
             System.out.println("Error: Either enter in a query number or 'custom'");
