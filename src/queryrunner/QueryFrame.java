@@ -355,7 +355,7 @@ public class QueryFrame extends javax.swing.JFrame {
             case "Inventory check":
                 szChoice = "Query 10";
                 break;
-            case "Create Checkin":
+            case "Create Check-in":
                 szChoice = "Query 11";
                 break;
             case "Case Update":
