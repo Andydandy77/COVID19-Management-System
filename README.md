@@ -1,4 +1,4 @@
-# Covid-Management-System
+# COVID-19 Management System
 
 Our mission is to help state health care systems properly manage and observe the ongoing COVID-19 Pandemic and its effect on its citizens. We strive to provide the tools and statistics to effectively monitor and take actions against COVID-10.
 This application aims to help track COVID-19's spread, manage hospital capacities and supplies, track cases and tests, and offers tracing capabilities. 
