@@ -9,7 +9,7 @@ We have built a console application, GUI, and an ASP.net web application for use
 
 To run queries in the console or GUI application you need to have the mm_cpsc502102team04 database set up in your local connection. 
 
-In your MYSQL workbench go to your local connection and open the dump.sql file. Run the SQL script and it will automatically create a new schema called mm_cpsc502102team04.
+In your MYSQL workbench go to your local connection and open the [dump.sql](https://github.com/Andydandy77/Covid-Management-System/blob/master/dump.sql). Run the SQL script and it will automatically create a new schema called mm_cpsc502102team04.
 
 ## Running the Application in IntelliJ IDEA
 
